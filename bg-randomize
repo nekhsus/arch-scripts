@@ -1,0 +1,2 @@
+#!/bin/sh
+shuf -zen1 $(dirname -- "$0")/data/wallpapers/* | xargs -0 feh --bg-scale 

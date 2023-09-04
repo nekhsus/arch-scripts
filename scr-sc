@@ -1,0 +1,109 @@
+#!/bin/sh
+
+#old script (bad) 
+
+#scrot ${@:-} -i -F '%b:%d::%H:%M:%S.png' -e '
+#	mv "$$PWD/$f" "$$HOME/.local/screenshots/$f" &&
+#	xclip -selection clipboard -t image/png -i "$$HOME/.local/screenshots/$f"
+#	'
+
+
+#VARs
+selection=""
+ignore=""
+
+edit=""
+clipboard=""
+
+filename=`date +%b:%d::%H:%M:%S.png` ;export filename=${filename}
+savedir="$HOME/.local/screenshots"
+
+
+#parsing params
+while test $# -gt 0; do
+	case "$1" in
+
+		-h|--help)
+			echo "scr-sc -- SCReen-SCreenshot (i'm good at names trust me )" # TODO print actual shit here # scr- cause i group my scripts this way
+			echo ""
+			echo "USAGE: i need a medic bag"
+			exit 0
+			;;
+
+		-s|--selection) 
+			shift
+			selection="-s"
+			;;
+		-i|--ignore) 
+			shift
+			ignore="-i"
+			;;
+
+		-c|--copy|--clipboard)
+			shift
+			clipboard="1"
+			;;
+
+		-e|--edit)
+			shift
+			edit="1" 
+			;;
+
+		-d)
+			shift
+			if test $# -gt 0; then
+				savedir=$1
+			else
+				echo "No save directory specified. Stop."
+				exit 1
+			fi
+			shift
+			;;
+		
+		--directory*)
+			savedir=`echo $1 | sed -e 's/^[^=]*=//g'`
+			shift
+			;;
+		-f)
+			shift
+			if test $# -gt 0; then
+				filename=$1
+			else
+				echo "No file name specified. Stop."
+				exit 1
+			fi
+			shift
+			;;
+
+
+	esac
+done
+
+
+
+
+
+scrot $selection $ignore -F $filename
+
+until [ -f "$PWD/$filename" ]
+do
+	sleep 1
+done
+
+mv $PWD/$filename $savedir/$filename
+
+if [ $edit == "1" ]
+then
+	cp "$savedir/$filename" "$savedir/${filename%.*}.bak.${filename##*.}"
+	swappy -f "$savedir/$filename" -o "$savedir/$filename"
+	estdout1="Edited "
+	estdout2="Original Image saved to $savedir/${filename%.*}.bak.${filename##*.}. "
+fi
+
+if [ $clipboard == "1" ]
+then
+	xclip -selection clipboard -t image/png -i "$savedir/$filename"
+	cstdout="Image sent to clipboard."
+fi
+
+notify-send -r 1339 "scr-sc" "${estdout1:-}Image saved to $savedir/$filename. ${estdout2:-}${cstdout:-}"

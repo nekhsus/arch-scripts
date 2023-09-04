@@ -1,0 +1,16 @@
+#!/bin/sh
+
+xkblayout-state set +1
+
+layouts=$(xkblayout-state print %S)
+layouts=${layouts@Q}
+layouts=${layouts//\\n/ }
+layouts=${layouts//\'/}
+layouts=${layouts//$/}
+layouts=($layouts)
+
+currlayout=$(xkblayout-state print %c)
+
+layouts[$currlayout]="\<b\>\[$(xkblayout-state print %s)\]\</b\>"
+layouts=${layouts[@]}
+notify-send -r 1340 "Layouts:" "${layouts}"

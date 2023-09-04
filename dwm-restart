@@ -1,0 +1,18 @@
+#!/bin/sh
+
+csum=""
+new_csum=$(sha1sum $(which dwm))
+while :
+do
+	if [ "$csum" != "$new_csum" ]
+	then
+		csum=$mew_csum
+		dwm
+		dmenu
+		dwmblocks
+	else
+		exit 0
+	fi
+	new_csum=$(sha1sum $(which dwm))
+done
+

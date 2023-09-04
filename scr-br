@@ -1,0 +1,23 @@
+#!/bin/sh
+
+
+
+
+if [ ${0:-+} = "u" -o ${1:-+} = "up" -o ${1-+} = "+" ]
+then
+	direction="+"
+fi
+
+if [ ${0:-+} = "d" -o ${1:-+} = "dn" -o ${1:-+} = "down" -o ${1:-+} = "-" ]
+then
+	direction="-"
+fi
+
+brightnessctl s ${2:-10}%$direction:
+
+CurrentBrightness=`brightnessctl -m`
+CurrentBrightness=${CurrentBrightness#*,*,*,}
+CurrentBrightness=${CurrentBrightness%%%,*}
+
+notify-send -r 1338 -t 2000 -h int:value:${CurrentBrightness} "Brightness: $CurrentBrightness%"  
+

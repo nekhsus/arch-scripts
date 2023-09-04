@@ -1,0 +1,87 @@
+#!/bin/sh
+
+if [ -z $1 ]; then
+	CurrentVolume=$(amixer get Master);
+        CurrentVolume=${CurrentVolume#*[};
+        CurrentVolume=${CurrentVolume%%%*};
+        notify-send -r 1337 -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%"
+fi
+
+while test $# -gt 0; do
+	case "$1" in
+
+		-h|--help)
+			echo "set music n stuff"
+			echo ""
+			echo "USAGE: scr-vol [direction/mute/set] [value]"
+			exit 0
+			;;
+
+		up|u)
+			shift
+			amixer set Master ${1:-2}%+
+			CurrentVolume=$(amixer get Master);
+                        CurrentVolume=${CurrentVolume#*[};
+                        CurrentVolume=${CurrentVolume%%%*};
+                        notify-send -r 1337 -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%"
+			shift
+			;;
+
+		down|dn|d)
+			shift
+			amixer set Master ${1:-2}%-
+			CurrentVolume=$(amixer get Master);
+                        CurrentVolume=${CurrentVolume#*[};
+                        CurrentVolume=${CurrentVolume%%%*};
+                        notify-send -r 1337 -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%"
+			shift
+			;;
+
+		set|s)
+			shift
+			if test $# -gt 0; then
+				amixer set Master $1%
+			else
+				echo "No set value specified. Stop."
+				exit 1
+			fi
+			shift
+			;;
+		mute|m)
+			shift
+			if [ -z "$SCRVOLPREVVOLUME" ]; then
+
+				if test $# -gt 0; then
+					SCRVOLPREVVOLUME=$1
+					export SCRVOLPREVVOLUME
+					amixer set Master 0%
+					CurrentVolume=$(amixer get Master);
+                                        CurrentVolume=${CurrentVolume#*[};
+                                        CurrentVolume=${CurrentVolume%%%*};
+                                        notify-send -r 1337 -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%" "MUTED"
+				else
+					CurrentVolume=$(amixer get Master)
+					CurrentVolume=${CurrentVolume#*[}
+					CurrentVolume=${CurrentVolume%%%*}
+
+					SCRVOLPREVVOLUME=$CurrentVolume
+					export SCRVOLPREVVOLUME
+					amixer set Master 0%
+					CurrentVolume=$(amixer get Master);
+                                        CurrentVolume=${CurrentVolume#*[};
+                                        CurrentVolume=${CurrentVolume%%%*};
+                                        notify-send -r 1337 -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%" "MUTED"
+				fi
+			else
+				amixer set $SCRVOLPREVVOLUME%
+                                #unset SCRVOLPREVVOLUME
+                                CurrentVolume=$(amixer get Master);
+                                CurrentVolume=${CurrentVolume#*[};
+                                CurrentVolume=${CurrentVolume%%%*};
+                                notify-send -t 2000 -h int:value:${CurrentVolume} "Volume: $CurrentVolume%" "UNMUTED"
+			fi
+			
+			;;
+	esac
+done
+	

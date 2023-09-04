@@ -1,0 +1,11 @@
+#!/bin/sh
+test=$(grep -v "#" $(dirname -- "$0")/data/emoji_list | dmenu -i -l 20)
+test=${test}
+test=${test:0:1}
+test=${test//$'\t\r\n '}
+echo -n $test | xclip -selection clipboard
+if [$(xclip -o -selection clipboard) = ""]
+then
+	exit 0
+fi
+notify-send -r 1341 "dmenu-emoji" "picked \"$(xclip -o -selection clipboard)\" and sent to clipboard"
